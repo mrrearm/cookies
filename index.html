@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biscotti della Fortuna</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, #1a0f0a 0%, #2d1b14 25%, #3d2a20 50%, #2d1b14 75%, #1a0f0a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Elementi fluttuanti di sfondo */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .sakura, .lantern, .coin {
+            position: absolute;
+            opacity: 0.3;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+        }
+        
+        .sakura {
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #ffb6c1, #ff69b4);
+            border-radius: 50% 0 50% 0;
+            transform: rotate(45deg);
+            animation: sakuraFloat 15s infinite;
+        }
+        
+        .lantern {
+            width: 20px;
+            height: 30px;
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            animation: lanternSway 12s infinite;
+        }
+        
+        .lantern::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 8px;
+            background: #8b4513;
+        }
+        
+        .coin {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            border: 2px solid #b8860b;
+            animation: coinRotate 10s infinite;
+        }
+        
+        @keyframes sakuraFloat {
+            0%, 100% { transform: translateY(100vh) rotate(45deg) scale(0.8); }
+            25% { transform: translateY(75vh) translateX(20px) rotate(225deg) scale(1.2); }
+            50% { transform: translateY(50vh) translateX(-10px) rotate(45deg) scale(0.9); }
+            75% { transform: translateY(25vh) translateX(15px) rotate(180deg) scale(1.1); }
+        }
+        
+        @keyframes lanternSway {
+            0%, 100% { transform: translateY(-100px) rotate(0deg); }
+            25% { transform: translateY(25vh) rotate(5deg); }
+            50% { transform: translateY(50vh) rotate(-3deg); }
+            75% { transform: translateY(75vh) rotate(2deg); }
+        }
+        
+        @keyframes coinRotate {
+            0% { transform: translateY(100vh) rotateY(0deg); }
+            50% { transform: translateY(50vh) rotateY(180deg); }
+            100% { transform: translateY(-100px) rotateY(360deg); }
+        }
+        
+        /* Container principale */
+        .container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        /* Overlay per evitare sovrapposizioni */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .title {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.3);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from { text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.3); }
+            to { text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 30px rgba(255,215,0,0.6), 0 0 40px rgba(255,215,0,0.2); }
+        }
+        
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: #ffcccb;
+            text-align: center;
+            margin-bottom: 3rem;
+            font-style: italic;
+            opacity: 0.9;
+        }
+        
+        /* Griglia dei biscotti */
+        .cookies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+        
+        /* Biscotto della fortuna */
+        .fortune-cookie {
+            position: relative;
+            width: 150px;
+            height: 120px;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+        }
+        
+        .fortune-cookie:hover {
+            transform: scale(1.1) translateY(-10px);
+            filter: drop-shadow(0 12px 24px rgba(255,215,0,0.3));
+        }
+        
+        .cookie-shell {
+            width: 150px;
+            height: 120px;
+            background: linear-gradient(135deg, #d4a574 0%, #c19553 25%, #a67c38 50%, #8b6914 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .cookie-shell::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 70%;
+            height: 30%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+        
+        .cookie-shell.cracked {
+            transform: scale(1.2);
+            background: linear-gradient(135deg, #e6b885 0%, #d4a574 25%, #c19553 50%, #a67c38 100%);
+        }
+        
+        /* Messaggio della fortuna */
+        .fortune-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #fff9e6, #f5f5dc);
+            padding: 0.8rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 2px solid #daa520;
+            max-width: 180px;
+            width: 160px;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.320, 1.275);
+            z-index: 1000;
+            font-size: 0.85rem;
+            line-height: 1.3;
+            color: #2c1810;
+        }
+        
+        .fortune-message.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        
+        .fortune-message::before {
+            content: '🥠';
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .fortune-text {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            font-size: 0.8rem;
+        }
+        
+        .fortune-author {
+            font-size: 0.7rem;
+            font-style: italic;
+            color: #8b6914;
+            opacity: 0.8;
+        }
+        
+        /* Bottone reset */
+        .reset-btn {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255,68,68,0.3);
+            font-family: 'Crimson Text', serif;
+            font-weight: 600;
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,68,68,0.4);
+            background: linear-gradient(135deg, #ff5555, #dd1111);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cookies-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .fortune-cookie {
+                width: 120px;
+                height: 96px;
+            }
+            
+            .cookie-shell {
+                width: 120px;
+                height: 96px;
+            }
+            
+            .fortune-message {
+                padding: 0.6rem;
+                font-size: 0.75rem;
+                max-width: 140px;
+                width: 130px;
+            }
+            
+            .fortune-text {
+                font-size: 0.7rem;
+            }
+            
+            .fortune-author {
+                font-size: 0.6rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .cookies-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements" id="floatingElements"></div>
+    <div class="overlay" id="overlay" onclick="closeAllMessages()"></div>
+    
+    <div class="container">
+        <h1 class="title">Biscotti della Fortuna</h1>
+        <p class="subtitle">Premi sui biscotti per scoprire il tuo destino</p>
+        
+        <div class="cookies-grid" id="cookiesGrid">
+            <!-- I biscotti verranno generati dinamicamente -->
+        </div>
+        
+        <button class="reset-btn" onclick="resetAllCookies()">Nuova Fortuna</button>
+    </div>
+
+    <script>
+        const fortunes = [
+            { text: "La felicità è un viaggio, non una destinazione.", author: "Antico proverbio cinese" },
+            { text: "Un albero che cade fa più rumore di una foresta che cresce.", author: "Lao Tzu" },
+            { text: "Il miglior momento per piantare un albero era 20 anni fa. Il secondo miglior momento è ora.", author: "Proverbio cinese" },
+            { text: "Non temere di crescere lentamente, temi solo di rimanere fermo.", author: "Confucio" },
+            { text: "Una gemma non può essere lucidata senza attrito, né l'uomo perfezionato senza prove.", author: "Proverbio cinese" },
+            { text: "Il saggio trova piacere nell'acqua; il virtuoso trova piacere nelle colline.", author: "Confucio" },
+            { text: "Anche un viaggio di mille miglia inizia con un singolo passo.", author: "Lao Tzu" },
+            { text: "Chi conosce gli altri è saggio; chi conosce se stesso è illuminato.", author: "Tao Te Ching" },
+            { text: "La pazienza è compagna della saggezza.", author: "Sant'Agostino" },
+            { text: "Il vento non si rompe mai un albero che si piega.", author: "Proverbio cinese" },
+            { text: "La fortuna aiuta gli audaci.", author: "Antico detto" },
+            { text: "Un sorriso è la chiave che apre il cuore di tutti.", author: "Saggezza orientale" }
+        ];
+
+        function createFloatingElements() {
+            const container = document.getElementById('floatingElements');
+            const elements = ['sakura', 'lantern', 'coin'];
+            
+            for (let i = 0; i < 15; i++) {
+                const element = document.createElement('div');
+                const type = elements[Math.floor(Math.random() * elements.length)];
+                element.className = type;
+                element.style.left = Math.random() * 100 + '%';
+                element.style.animationDelay = Math.random() * 10 + 's';
+                element.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(element);
+            }
+        }
+
+        function createCookies() {
+            const grid = document.getElementById('cookiesGrid');
+            for (let i = 0; i < 6; i++) {
+                const cookie = document.createElement('div');
+                cookie.className = 'fortune-cookie';
+                cookie.innerHTML = `
+                    <div class="cookie-shell" onclick="openCookie(this)"></div>
+                    <div class="fortune-message">
+                        <div class="fortune-text"></div>
+                        <div class="fortune-author"></div>
+                    </div>
+                `;
+                grid.appendChild(cookie);
+            }
+        }
+
+        function openCookie(shell) {
+            if (shell.classList.contains('cracked')) return;
+            
+            // Chiudi tutti gli altri messaggi
+            closeAllMessages();
+            
+            const fortuneMessage = shell.nextElementSibling;
+            const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+            
+            // Aggiungi effetto crack
+            shell.classList.add('cracked');
+            
+            // Attiva overlay
+            document.getElementById('overlay').classList.add('active');
+            
+            // Popola il messaggio
+            fortuneMessage.querySelector('.fortune-text').textContent = fortune.text;
+            fortuneMessage.querySelector('.fortune-author').textContent = '— ' + fortune.author;
+            
+            // Mostra il messaggio con delay
+            setTimeout(() => {
+                fortuneMessage.classList.add('show');
+            }, 300);
+        }
+
+        function closeAllMessages() {
+            const messages = document.querySelectorAll('.fortune-message');
+            messages.forEach(message => {
+                message.classList.remove('show');
+            });
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function resetAllCookies() {
+            closeAllMessages();
+            
+            setTimeout(() => {
+                const cookies = document.querySelectorAll('.fortune-cookie');
+                cookies.forEach(cookie => {
+                    const shell = cookie.querySelector('.cookie-shell');
+                    shell.classList.remove('cracked');
+                });
+            }, 300);
+        }
+
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', () => {
+            createFloatingElements();
+            createCookies();
+        });
+    </script>
+</body>
+</html>
